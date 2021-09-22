@@ -11,12 +11,21 @@ public class GameInstance
 
     public DateTime CreatedDTTM { get; set; }
 
-    public IEnumerable<Component> Components { get;set; } = new List<Component>();
+    public GameInstanceSummary Summary { get; set; } = new();
+
+    public IEnumerable<GameInstanceComponent> Components { get;set; } = new List<GameInstanceComponent>();
 }
 
-public class GameComponent
+public class GameInstanceComponent : Component
 {
-    public long GameComponentId { get; set; }
+    public long ComponentAttributeId { get; set; }
 
-    public IEnumerable<Component> Components { get;set; } = new List<Component>();
+    public int PointValue { get; set; }
+
+    public int RollupPointValue { get; set; }
+
+}
+
+public class GameInstanceSummary {
+    public int? PointTotal { get; set; }
 }

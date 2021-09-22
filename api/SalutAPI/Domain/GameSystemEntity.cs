@@ -4,47 +4,86 @@ using SalutAPI.Util;
 namespace SalutAPI.Domain;
 
 public class GameSystemEntity {
-    public async Task<GameInstance> BuildGameInstance(long gameSystemId) {
+    private GameSystemOptions _gameSystemOpts = new();
+    private int _pointTotal = 0;
+
+    public async Task<GameInstance> BuildGameInstanceAsync(long gameSystemId) {
         GameSystemRepo gsRepo = new();
         GameSystem gs = await gsRepo.FindByIdAsync(gameSystemId);
 
         return new() {
             GameSystemId = gs.Id,
             CreatedDTTM = DateTime.UtcNow,
-            Components = await RunPlayerSetupSteps(gs)
+            Components = await RunPlayerSetupStepsAsync(gs, () => new GameSystemOptions {
+                PlayerCount = 2,
+                ComponentPointLimit = 50,
+                AttributeApplyPercent = 50,
+                RetryTolerance = 10
+            })
         };
     }
 
-    private async Task<List<Component>> RunPlayerSetupSteps(GameSystem gameSystem) {
-        List<Component> returnComponents = new();
+    private async Task<List<GameInstanceComponent>> RunPlayerSetupStepsAsync(GameSystem gameSystem, Func<GameSystemOptions>? gameSystemOptions = null) {
+        if (gameSystemOptions != null) _gameSystemOpts = gameSystemOptions();
+
+        List<GameInstanceComponent> returnComponents = new();
         
-        foreach (PlayerSetupStep playerStep in gameSystem.PlayerConfig.Steps.OrderBy(st => st.StepOrder)) {
-            // Pull Component for the step Component Type
-            Component[] components = GatherComponents(gameSystem, playerStep.ComponentTypeId);
+        for(int playerItem = 0; playerItem < _gameSystemOpts.PlayerCount; playerItem++) {
+            _pointTotal = 0;
+            int retryCount = 0;
 
-            Component c = SelectComponent(components);
+            foreach (PlayerSetupStep playerStep in gameSystem.PlayerConfig.Steps.OrderBy(st => st.StepOrder)) {
+                List<GameInstanceComponent> playerComponents = new();
 
-            c.Children = await SelectChildComponents(gameSystem, c);
+                do {
+                    if (!playerComponents.Any() || playerComponents.Count() < playerStep.SelectionCount) {
+                        // Pull Component for the step Component Type
+                        Component[] components = GatherComponents(gameSystem, playerStep.ComponentTypeId);
+                        Component component = SelectComponent(components);
+                        // Attach Selected Component to the game instance
+                        if (CheckPointCount(component)) {
+                            component.Children = await SelectChildComponents(gameSystem, component);
+                            playerComponents.Add(component);
+                        }
 
-            // Attach Selected Component to the game instance
-            returnComponents.Add(c);
+                        
+
+
+                    } else {
+                        // Loop through each player component
+
+
+
+                    }
+                    retryCount++;
+                } while(_pointTotal < (_gameSystemOpts.ComponentPointLimit ?? 0) || playerComponents.Count() < playerStep.SelectionCount || retryCount < _gameSystemOpts.RetryTolerance);
+                
+
+                returnComponents.AddRange(playerComponents);
+
+                
+            }
         }
-
+        
         return returnComponents;
     }
+
+    
 
     private async Task<List<Component>> SelectChildComponents(GameSystem gs, Component parentComponent) {
         List<Component> childComponents = new();
         Component[] children = GatherChildComponents(gs, parentComponent.Id);
         if (children.Any()) {
             Component c = SelectComponent(children);
-            List<Component> addComponents = await SelectChildComponents(gs, c);
-            if (c.Attributes?.Any() ?? false) {
-                addComponents.AddRange(await SelectAttributes(gs, c));
-            }
+            if (CheckPointCount(c)) {
+                List<Component> addComponents = await SelectChildComponents(gs, c);
+                if (c.Attributes?.Any() ?? false) {
+                    addComponents.AddRange(await SelectAttributes(gs, c));
+                }
 
-            c.Children = addComponents;
-            childComponents.Add(c);
+                c.Children = addComponents;
+                childComponents.Add(c);
+            }
         }
         return childComponents;
     }
@@ -53,12 +92,34 @@ public class GameSystemEntity {
         List<Component> attributes = new();
         await foreach(var att in FetchComponentTypeAttributes(srcComponent)) {
             Component[] attComponents = GatherComponents(gs, (int)att.Value);
-            attributes.Add(SelectComponent(attComponents));
+            Component attComp = SelectComponent(attComponents);
+            if (CheckPointCount(attComp).IsValid) {
+                attributes.Add(attComp);
+            }
         }
         return attributes;
     }
 
-    private async IAsyncEnumerable<ComponentAttribute> FetchComponentTypeAttributes(Component c) { foreach(var att in c.Attributes.Where(x => x.Type == ComponentAttributeType.ComponentType))  yield return att; }
+    private (bool IsValid, int PointValue, int RollupPointValue) CheckPointCount(Component component) {
+
+
+
+        // Get Component Point Cost
+        int pointCost = (int) (component?.Attributes?.FirstOrDefault(a => a.Type == ComponentAttributeType.PointCost)?.Value ?? 0);
+        
+        // Compare to Running Point Total
+        if ((pointCost + _pointTotal) <= _gameSystemOpts.ComponentPointLimit) {
+            _pointTotal += pointCost;
+
+            // Get Rollup PointCost
+
+            return (true, pointCost, 0);
+        } else {
+            return (false, pointCost, 0);
+        }
+    }
+
+    private async IAsyncEnumerable<ComponentAttribute> FetchComponentTypeAttributes(Component c) { foreach(var att in c.Attributes.Where(x => x.Type == ComponentAttributeType.ComponentType)) yield return att; }
 
     private Component SelectComponent(IEnumerable<Component> components) {
         int selectionIndex = RandomUtil.Get(0, components.Count());

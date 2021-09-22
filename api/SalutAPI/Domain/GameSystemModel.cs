@@ -16,6 +16,7 @@ public class GameSystemOptions {
     public int AttributeApplyPercent { get; set; } = 100;
     public int? ComponentPointLimit { get; set; } = null;
     public int PlayerCount { get; set; } = 2;
+    public int RetryTolerance { get; set; } = 5;
 }
 
 public class GameSystemConfig {
