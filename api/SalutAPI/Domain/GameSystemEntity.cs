@@ -85,6 +85,8 @@ public class GameSystemEntity {
                         }
                     } else {
                         // Loop through each player component
+                        
+
 
 
 
@@ -126,6 +128,7 @@ public class GameSystemEntity {
                 }
 
                 c.Children = addComponents;
+                c.RollupPointValue = GetRollupCost(c);
                 childComponents.Add(c);
             }
         }
