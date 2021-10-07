@@ -142,3 +142,4 @@ msbuild.wrn
 
 # Custom
 build/*
+upgrades.txt
