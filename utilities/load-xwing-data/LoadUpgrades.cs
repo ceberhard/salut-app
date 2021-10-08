@@ -5,9 +5,9 @@ using ClosedXML.Excel;
 
 namespace LoadXWing {
     public class LoadUpgrades {
-        private static int COL_UPGRADE_NAME = 1;
-        private static int COL_UPGRADE_TYPE = 2;
-        private static int COL_UPGRADE_COST = 3;
+        private const int COL_UPGRADE_NAME = 1;
+        private const int COL_UPGRADE_TYPE = 2;
+        private const int COL_UPGRADE_COST = 3;
 
         public async static Task LoadAsync(string upgradeFilePath) {
             using (XLWorkbook wb = new(upgradeFilePath)) {
@@ -32,9 +32,6 @@ namespace LoadXWing {
                     components.Append($"Attributes = new List<ComponentAttribute> {{ new() {{ Id = {attCostId}, Value = {cost}, Type = ComponentAttributeType.PointCost }} }} }},");
                     components.AppendLine();
 
-                    // new Component { Id = 113, Name = "Daredevil", ComponentTypeId = 50, ComponentType = new() { Id = 50, Name = "Talent Upgrade" },
-                    // Attributes = new List<ComponentAttribute> { new() { Id = 784, Value = 2, Type = ComponentAttributeType.PointCost } } },
-
                     componentId++;
                     attCostId++;
                 }
@@ -46,22 +43,22 @@ namespace LoadXWing {
         }
 
         private static int GetComponentTypeId(string typeText) => typeText switch {
-            "Astromech" => Constants.UPGRADE_TYPE_ASTROMECH,
-            "Cannon" => Constants.UPGRADE_TYPE_CANNON,
-            "Configuration" => Constants.UPGRADE_TYPE_CONFIGURATION,
-            "Crew" => Constants.UPGRADE_TYPE_CREW,
-            "Force Power" => Constants.UPGRADE_TYPE_FORCE,
-            "Gunner" => Constants.UPGRADE_TYPE_GUNNER,
-            "Illicit" => Constants.UPGRADE_TYPE_ILLICIT,
-            "Missile" => Constants.UPGRADE_TYPE_MISSILE,
-            "Modification" => Constants.UPGRADE_TYPE_MODIFICATION,
-            "Payload" => Constants.UPGRADE_TYPE_PAYLOAD,
-            "Sensor" => Constants.UPGRADE_TYPE_SENSOR,
-            "Talent" => Constants.UPGRADE_TYPE_TALENT,
-            "Tech" => Constants.UPGRADE_TYPE_TECH,
-            "Torpedo" => Constants.UPGRADE_TYPE_TORPEDO,
-            "Turret" => Constants.UPGRADE_TYPE_TURRET,
-            "Title" => Constants.UPGRADE_TYPE_TITLE,
+            "Astromech" => Constants.COMPONENT_UPGRADE_TYPE_ASTROMECH,
+            "Cannon" => Constants.COMPONENT_UPGRADE_TYPE_CANNON,
+            "Configuration" => Constants.COMPONENT_UPGRADE_TYPE_CONFIGURATION,
+            "Crew" => Constants.COMPONENT_UPGRADE_TYPE_CREW,
+            "Force Power" => Constants.COMPONENT_UPGRADE_TYPE_FORCE,
+            "Gunner" => Constants.COMPONENT_UPGRADE_TYPE_GUNNER,
+            "Illicit" => Constants.COMPONENT_UPGRADE_TYPE_ILLICIT,
+            "Missile" => Constants.COMPONENT_UPGRADE_TYPE_MISSILE,
+            "Modification" => Constants.COMPONENT_UPGRADE_TYPE_MODIFICATION,
+            "Payload" => Constants.COMPONENT_UPGRADE_TYPE_PAYLOAD,
+            "Sensor" => Constants.COMPONENT_UPGRADE_TYPE_SENSOR,
+            "Talent" => Constants.COMPONENT_UPGRADE_TYPE_TALENT,
+            "Tech" => Constants.COMPONENT_UPGRADE_TYPE_TECH,
+            "Torpedo" => Constants.COMPONENT_UPGRADE_TYPE_TORPEDO,
+            "Turret" => Constants.COMPONENT_UPGRADE_TYPE_TURRET,
+            "Title" => Constants.COMPONENT_UPGRADE_TYPE_TITLE,
             _ => throw new ArgumentException($"Not supported Upgrade Type: {typeText}"),
         };
     }

@@ -20,7 +20,7 @@ public class GameInstanceComponent : Component
 {
     public GameInstanceComponent() { }
 
-public GameInstanceComponent(Component component, long componentAttributeId, int pointValue, int rollupPointValue)
+    public GameInstanceComponent(Component component, long componentAttributeId, int pointValue, int rollupPointValue)
     {   
         SetComponentValues(component);
         this.ComponentAttributeId = componentAttributeId;
@@ -43,7 +43,7 @@ public GameInstanceComponent(Component component, long componentAttributeId, int
 
     public int RollupPointValue { get; set; }
 
-    public new IEnumerable<GameInstanceComponent> Children { get; set; } = new List<GameInstanceComponent>();
+    public new List<GameInstanceComponent> Children { get; set; } = new List<GameInstanceComponent>();
 
     public void SetComponentValues(Component src) {
         this.GameSystemId = src.GameSystemId;

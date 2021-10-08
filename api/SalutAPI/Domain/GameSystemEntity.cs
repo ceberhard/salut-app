@@ -16,8 +16,8 @@ public class GameSystemEntity {
             CreatedDTTM = DateTime.UtcNow,
             Components = await RunPlayerSetupStepsAsync(gs, () => new GameSystemOptions {
                 PlayerCount = 2,
-                ComponentPointLimit = 100,
-                AttributeApplyPercent = 50,
+                ComponentPointLimit = 200,
+                AttributeApplyPercent = 40,
                 RetryTolerance = 10
             })
         };
@@ -74,22 +74,23 @@ public class GameSystemEntity {
                     if (!playerComponents.Any() || playerComponents.Count() < playerStep.SelectionCount) {
                         // Pull Component for the step Component Type
                         Component[] components = GatherComponents(gameSystem, playerStep.ComponentTypeId);
-                        GameInstanceComponent component = new(SelectComponent(components), 0, 0);
-                        // Attach Selected Component to the game instance
-                        (bool isValid, int points) = CheckPointCount(component);
-                        if (isValid) {
-                            component.PointValue = points;
-                            component.Children = await SelectChildComponents(gameSystem, component);
-                            component.RollupPointValue = GetRollupCost(component);
-                            playerComponents.Add(component);
+                        if (components?.Any() ?? false) {
+                            GameInstanceComponent component = new(SelectComponent(components), 0, 0);
+                            // Attach Selected Component to the game instance
+                            (bool isValid, int points) = CheckPointCount(component);
+                            if (isValid) {
+                                component.PointValue = points;
+                                component.Children = await SelectChildComponents(gameSystem, component);
+                                component.RollupPointValue = GetRollupCost(component);
+                                playerComponents.Add(component);
+                            }
                         }
                     } else {
                         // Loop through each player component
-                        
-
-
-
-
+                        foreach(GameInstanceComponent component in playerComponents) {
+                            component.Children.AddRange(await SelectChildComponents(gameSystem, component));
+                            component.RollupPointValue = GetRollupCost(component);
+                        }
                     }
                     retryCount++;
                 } while((_pointTotal < (_gameSystemOpts.ComponentPointLimit ?? 0) || playerComponents.Count() < playerStep.SelectionCount) && retryCount < _gameSystemOpts.RetryTolerance);
@@ -104,11 +105,13 @@ public class GameSystemEntity {
     private async Task<List<GameInstanceComponent>> SelectAttributes(GameSystem gs, IEnumerable<ComponentAttribute> attributes) {
         List<GameInstanceComponent> componentAttributes = new();
         await foreach(var att in FetchComponentTypeAttributes(attributes)) {
-            Component[] attComponents = GatherComponents(gs, (int)att.Value);
-            Component attComp = SelectComponent(attComponents);
-            (bool isValid, int points) = CheckPointCount(attComp);
-            if (isValid) {
-                componentAttributes.Add(new GameInstanceComponent(attComp, attComp.Id, points, 0)); //rollupPoints));
+            if (Util.RandomUtil.CheckPercent(_gameSystemOpts.AttributeApplyPercent)) {
+                Component[] attComponents = GatherComponents(gs, (int)att.Value);
+                Component attComp = SelectComponent(attComponents);
+                (bool isValid, int points) = CheckPointCount(attComp);
+                if (isValid) {
+                    componentAttributes.Add(new GameInstanceComponent(attComp, attComp.Id, points, 0)); //rollupPoints));
+                }
             }
         }
         return componentAttributes;
@@ -136,7 +139,10 @@ public class GameSystemEntity {
     }
 
     private Component SelectComponent(IEnumerable<Component> components) {
-        int selectionIndex = RandomUtil.Get(0, components.Count());
-        return components.Skip(selectionIndex).First();
+        if (components?.Any() ?? false) {
+            int selectionIndex = RandomUtil.Get(0, components.Count());
+            return components.Skip(selectionIndex).First();
+        }
+        return null;
     }
 }

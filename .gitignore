@@ -142,4 +142,8 @@ msbuild.wrn
 
 # Custom
 build/*
+factions.txt
 upgrades.txt
+imperials.txt
+rebels.txt
+scum.txt

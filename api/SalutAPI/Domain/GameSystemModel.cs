@@ -76,6 +76,7 @@ public class Component {
     public long ComponentTypeId { get; set; }
     public long? ParentComponentId { get; set; }
     public string Name { get; set; }
+    public string Description { get; set; } = null;
 
     public ComponentType ComponentType { get; set; }
 
