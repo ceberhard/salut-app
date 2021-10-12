@@ -65,7 +65,7 @@ public class GameSystemEntity {
                         if (components?.Any() ?? false) {
                             Component component = SelectComponent(components);
                             // Attach Selected Component to the game instance
-                            (bool isValid, int points) = VerifyComponent(component);
+                            (bool isValid, int points) = VerifyComponent(component, playerComponents);
                             if (isValid) {
                                 GameInstanceComponent gComponent= new(component, points, 0);
                                 gComponent.Children = await SelectChildComponents(gameSystem, gComponent);
@@ -94,7 +94,7 @@ public class GameSystemEntity {
             if (Util.RandomUtil.CheckPercent(_gameSystemOpts.AttributeApplyPercent)) {
                 Component[] attComponents = GatherComponents(gs, (int)att.Value);
                 Component attComp = SelectComponent(attComponents);
-                (bool isValid, int points) = VerifyComponent(attComp);
+                (bool isValid, int points) = VerifyComponent(attComp, componentAttributes);
                 if (isValid) {
                     componentAttributes.Add(new GameInstanceComponent(attComp, attComp.Id, points, 0)); //rollupPoints));
                 }
@@ -132,8 +132,11 @@ public class GameSystemEntity {
         return null;
     }
 
-    private (bool IsValid, int PointValue) VerifyComponent(Component component) {
-        if (!component.InstanceLimit.HasValue || GetCurrentInstanceCount(component.Id, _gameComponents) < component.InstanceLimit.Value) {
+    private (bool IsValid, int PointValue) VerifyComponent(Component component, List<GameInstanceComponent> addtlComponents = null) {
+        var checkList = _gameComponents.ToArray();
+        checkList.AddRange(addtlComponents ?? new());
+
+        if (!component.InstanceLimit.HasValue || GetCurrentInstanceCount(component.Id, checkList) < component.InstanceLimit.Value) {
             // Get Component Point Cost
             int pointCost = (int) (component?.Attributes?.FirstOrDefault(a => a.Type == ComponentAttributeType.PointCost)?.Value ?? 0);
 
@@ -150,11 +153,11 @@ public class GameSystemEntity {
         }
     }
 
-    private int GetCurrentInstanceCount(long componentId, List<GameInstanceComponent> components) {
+    private int GetCurrentInstanceCount(long componentId, GameInstanceComponent[] components) {
         int instanceCount = 0;
         foreach(GameInstanceComponent c in components) {
             instanceCount += (c.ComponentId == componentId) ? 1 : 0;
-            instanceCount += GetCurrentInstanceCount(componentId, c.Children);
+            instanceCount += GetCurrentInstanceCount(componentId, c.Children.ToArray());
         }
         return instanceCount;
     }
