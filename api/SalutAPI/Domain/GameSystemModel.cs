@@ -77,6 +77,7 @@ public class Component {
     public long? ParentComponentId { get; set; }
     public string Name { get; set; }
     public string Description { get; set; } = null;
+    public int? InstanceLimit { get; set; }
 
     public ComponentType ComponentType { get; set; }
 

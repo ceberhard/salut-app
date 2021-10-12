@@ -25,9 +25,9 @@ public class GameSystemRepo {
                 }
             },
             Components = new List<Component>() {
-                new Component { Id = 2001, Name = "Rebels", ComponentTypeId = 2601, ComponentType = new() { Id = 2601, Name = "Faction" } },
-                new Component { Id = 2002, Name = "Imperials", ComponentTypeId = 2601, ComponentType = new() { Id = 2601, Name = "Faction" } },
-                new Component { Id = 2003, Name = "Scum & Villainy", ComponentTypeId = 2601, ComponentType = new() { Id = 2601, Name = "Faction" } },
+                new Component { Id = 2001, Name = "Rebels", InstanceLimit = 1, ComponentTypeId = 2601, ComponentType = new() { Id = 2601, Name = "Faction" } },
+                new Component { Id = 2002, Name = "Imperials", InstanceLimit = 1, ComponentTypeId = 2601, ComponentType = new() { Id = 2601, Name = "Faction" } },
+                new Component { Id = 2003, Name = "Scum & Villainy", InstanceLimit = 1, ComponentTypeId = 2601, ComponentType = new() { Id = 2601, Name = "Faction" } },
                 new Component { Id = 700, Name = "\"Chopper\"", ComponentTypeId = 2801, ComponentType = new() { Id = 2801, Name = "Astromech Upgrade" }, Attributes = new List<ComponentAttribute> { new() { Id = 900, Value = 2, Type = ComponentAttributeType.PointCost } } },
                 new Component { Id = 701, Name = "R2-D2", ComponentTypeId = 2801, ComponentType = new() { Id = 2801, Name = "Astromech Upgrade" }, Attributes = new List<ComponentAttribute> { new() { Id = 901, Value = 10, Type = ComponentAttributeType.PointCost } } },
                 new Component { Id = 702, Name = "R5-D8", ComponentTypeId = 2801, ComponentType = new() { Id = 2801, Name = "Astromech Upgrade" }, Attributes = new List<ComponentAttribute> { new() { Id = 902, Value = 6, Type = ComponentAttributeType.PointCost } } },

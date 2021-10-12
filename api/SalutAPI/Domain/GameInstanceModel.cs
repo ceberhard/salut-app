@@ -37,6 +37,8 @@ public class GameInstanceComponent : Component
 
     public long ComponentId;
 
+    public int? InstanceLimit { get; set; }
+
     public long ComponentAttributeId { get; set; }
 
     public int PointValue { get; set; }
@@ -48,6 +50,7 @@ public class GameInstanceComponent : Component
     public void SetComponentValues(Component src) {
         this.GameSystemId = src.GameSystemId;
         this.ComponentId = src.Id;
+        this.InstanceLimit = src.InstanceLimit;
         this.ComponentTypeId = src.ComponentTypeId;
         this.ParentComponentId = src.ParentComponentId;
         this.Name = src.Name;
