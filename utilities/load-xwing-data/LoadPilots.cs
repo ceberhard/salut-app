@@ -45,10 +45,12 @@ namespace LoadXWing {
                     var name = r.Cell(COL_PILOT_NAME).GetString();
                     var description = r.Cell(COL_PILOT_SUBTITLE).GetString();
                     var cost = r.Cell(COL_PILOT_COST).GetString();
+                    var instanceLimit = r.Cell(COL_PILOT_INSTANCE_LIMIT).GetString();
                     
                     components.Append($"new Component {{ Id = {componentId}, ");
                     components.Append($"ParentComponentId = {parentComponentId}, ");
                     components.Append($"Name = \"{name.Replace("\"", "\\\"")}\", ");
+                    components.Append($"InstanceLimit = {instanceLimit}, ");
                     components.Append($"Description = \"{description.Replace("\"", "\\\"")}\", ");
                     components.Append($"ComponentTypeId = {Constants.COMPONENT_PILOT_SHIP_TYPE}, ");
                     components.Append($"ComponentType = new() {{ Id = {Constants.COMPONENT_PILOT_SHIP_TYPE}, Name = \"Pilot (Ship)\" }}, ");
@@ -95,7 +97,7 @@ namespace LoadXWing {
             double upgradeCount = (double)row.Cell(colIndex).Value;
             for (var i = 0; i < upgradeCount; i++) {
                 attributeId++;
-                atts.Append($", new () {{ Id = {attributeId}, Value = {upgradeTypeId}, Type = ComponentAttributeType.ComponentType }}");
+                atts.Append($", new () {{ Id = {attributeId}, Value = {upgradeTypeId}, Type = ComponentAttributeType.AppendComponentType }}");
             }
             return atts.ToString();
         }

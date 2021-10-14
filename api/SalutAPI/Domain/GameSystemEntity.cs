@@ -26,7 +26,7 @@ public class GameSystemEntity {
         };
     }
 
-    private async IAsyncEnumerable<ComponentAttribute> FetchComponentTypeAttributes(IEnumerable<ComponentAttribute> atts) { foreach(var att in atts.Where(x => x.Type == ComponentAttributeType.ComponentType)) yield return att; }
+    private async IAsyncEnumerable<ComponentAttribute> FetchComponentTypeAttributes(IEnumerable<ComponentAttribute> atts) { foreach(var att in atts.Where(x => x.Type == ComponentAttributeType.AppendComponentType)) yield return att; }
 
     private Component[] GatherChildComponents(GameSystem gs, long parentComponentId) => gs.Components.Where(c => c.ParentComponentId.HasValue && c.ParentComponentId.Value == parentComponentId).ToArray();
 
@@ -136,7 +136,7 @@ public class GameSystemEntity {
         var checkList = _gameComponents.ToArray();
         checkList.AddRange(addtlComponents ?? new());
 
-        if (!component.InstanceLimit.HasValue || GetCurrentInstanceCount(component.Id, checkList) < component.InstanceLimit.Value) {
+        if ((!component?.InstanceLimit.HasValue ?? false) || GetCurrentInstanceCount(component.Id, checkList) < component.InstanceLimit.Value) {
             // Get Component Point Cost
             int pointCost = (int) (component?.Attributes?.FirstOrDefault(a => a.Type == ComponentAttributeType.PointCost)?.Value ?? 0);
 

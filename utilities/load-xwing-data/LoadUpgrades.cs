@@ -8,6 +8,8 @@ namespace LoadXWing {
         private const int COL_UPGRADE_NAME = 1;
         private const int COL_UPGRADE_TYPE = 2;
         private const int COL_UPGRADE_COST = 3;
+        private const int COL_UPGRADE_INSTANCE_LIMIT = 4;
+        private const int COL_UPGRADE_FACTION_RESTRICTION = 5;
 
         public async static Task LoadAsync(string upgradeFilePath) {
             using (XLWorkbook wb = new(upgradeFilePath)) {
@@ -23,13 +25,23 @@ namespace LoadXWing {
                     var name = r.Cell(COL_UPGRADE_NAME).GetString();
                     var type = r.Cell(COL_UPGRADE_TYPE).GetString();
                     var cost = r.Cell(COL_UPGRADE_COST).GetString();
+                    var instanceLimit = r.Cell(COL_UPGRADE_INSTANCE_LIMIT).GetString();
+                    var factionRestriction = r.Cell(COL_UPGRADE_FACTION_RESTRICTION).GetString();
                     var typeId = GetComponentTypeId(type);
 
                     components.Append($"new Component {{ Id = {componentId}, ");
                     components.Append($"Name = \"{name.Replace("\"", "\\\"")}\", ");
+                    components.Append($"InstanceLimit = {instanceLimit}, ");
                     components.Append($"ComponentTypeId = {typeId}, ");
                     components.Append($"ComponentType = new() {{ Id = {typeId}, Name = \"{type} Upgrade\" }}, ");
-                    components.Append($"Attributes = new List<ComponentAttribute> {{ new() {{ Id = {attCostId}, Value = {cost}, Type = ComponentAttributeType.PointCost }} }} }},");
+                    components.Append($"Attributes = new List<ComponentAttribute> {{ new() {{ Id = {attCostId}, Value = {cost}, Type = ComponentAttributeType.PointCost }}");
+
+                    if (!string.IsNullOrWhiteSpace(factionRestriction)) {
+                        attCostId++;
+                        components.Append($", new() {{ Id = {attCostId}, Value = {GetFactionId(factionRestriction)}, Type = ComponentAttributeType.ComponentRestriction }}");
+                    }
+
+                    components.Append(" } },");
                     components.AppendLine();
 
                     componentId++;
@@ -60,6 +72,13 @@ namespace LoadXWing {
             "Turret" => Constants.COMPONENT_UPGRADE_TYPE_TURRET,
             "Title" => Constants.COMPONENT_UPGRADE_TYPE_TITLE,
             _ => throw new ArgumentException($"Not supported Upgrade Type: {typeText}"),
+        };
+
+        private static int GetFactionId(string faction) => faction switch {
+            "Rebels" => Constants.COMPONENT_FACTION_REBELS,
+            "Imperials" => Constants.COMPONENT_FACTION_IMPERIALS,
+            "Scum & Villainy" => Constants.COMPONENT_FACTION_SCUM,
+            _ => throw new ArgumentException($"Not supported Faction: {faction}"),
         };
     }
 }

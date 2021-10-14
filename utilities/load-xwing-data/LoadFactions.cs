@@ -22,6 +22,7 @@ namespace LoadXWing {
 
         private static string BuildComponent(int id, string name) {
             StringBuilder c = new StringBuilder($"new Component {{ Id = {id}, Name = \"{name}\", ");
+            c.Append("InstanceLimit = 1, ");
             c.Append($"ComponentTypeId = {Constants.COMPONENT_FACTION_TYPE}, ");
             c.Append($"ComponentType = new() {{ Id = {Constants.COMPONENT_FACTION_TYPE}, Name = \"Faction\" }} }},");
             return c.ToString();

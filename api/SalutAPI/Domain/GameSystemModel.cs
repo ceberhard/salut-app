@@ -22,7 +22,6 @@ public class GameSystemOptions {
 public class GameSystemConfig {
     public long Id { get; set; }
     public long GameSystemId { get; set; }
-    
     public int PlayerMinCount { get; set; }
     public int PlayerMaxCount { get; set; }
 }
@@ -92,8 +91,10 @@ public class ComponentLinkType {
 }
 
 public enum ComponentAttributeType {
-    ComponentType = 1,
-    PointCost = 2
+    AppendComponentType = 1,
+    ComponentRestriction = 2,
+    DescriptiveComponentType = 3,
+    PointCost = 4
 }
 
 public class ComponentAttribute {
