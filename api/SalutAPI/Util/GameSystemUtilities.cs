@@ -20,7 +20,7 @@ public class RandomUtil {
 public static class IEnumerable {
     public static void AddRange<T>(this IEnumerable<T> addTo, IEnumerable<T> items ) {
         foreach(var item in items) {
-            _ = addTo.Append(item);
+            addTo = addTo.Append(item);
         }
     }
 }

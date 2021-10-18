@@ -30,7 +30,20 @@ public class GameSystemEntity {
 
     private Component[] GatherChildComponents(GameSystem gs, long parentComponentId) => gs.Components.Where(c => c.ParentComponentId.HasValue && c.ParentComponentId.Value == parentComponentId).ToArray();
 
-    private Component[] GatherComponents(GameSystem gs, long componentTypeId) => gs.Components.Where(c => c.ComponentTypeId == componentTypeId).ToArray();
+    private Component[] GatherComponents(GameSystem gs, long componentTypeId,params GameInstanceComponent[] checkComponents) {
+        List<Component> gathered = new();
+        var comps = gs.Components.Where(c => c.ComponentTypeId == componentTypeId);
+        foreach(Component comp in comps) {
+            var atts = comp.Attributes?.Where(att => att.Type == ComponentAttributeType.ComponentRestriction).ToArray() ?? new ComponentAttribute[0];
+            if (!atts.Any()) {
+                gathered.Add(comp);
+            } else {
+                if (atts.All(att => CheckComponentRestrictions((long)att.Value, checkComponents))) gathered.Add(comp);
+            }
+
+        }
+        return gathered.ToArray();
+    }
 
     private int GetRollupCost(GameInstanceComponent instanceComponent) {
         int? rollUp = null;
@@ -61,7 +74,8 @@ public class GameSystemEntity {
                 do {
                     if (!playerComponents.Any() || playerComponents.Count() < playerStep.SelectionCount) {
                         // Pull Component for the step Component Type
-                        Component[] components = GatherComponents(gameSystem, playerStep.ComponentTypeId);
+                        
+                        Component[] components = GatherComponents(gameSystem, playerStep.ComponentTypeId, playerComponents.ToArray());
                         if (components?.Any() ?? false) {
                             Component component = SelectComponent(components);
                             // Attach Selected Component to the game instance
@@ -88,11 +102,11 @@ public class GameSystemEntity {
         }
     }
 
-    private async Task<List<GameInstanceComponent>> SelectAttributes(GameSystem gs, IEnumerable<ComponentAttribute> attributes) {
+    private async Task<List<GameInstanceComponent>> SelectAttributes(GameSystem gs, IEnumerable<ComponentAttribute> attributes, List<GameInstanceComponent> components) {
         List<GameInstanceComponent> componentAttributes = new();
         await foreach(var att in FetchComponentTypeAttributes(attributes)) {
             if (Util.RandomUtil.CheckPercent(_gameSystemOpts.AttributeApplyPercent)) {
-                Component[] attComponents = GatherComponents(gs, (int)att.Value);
+                Component[] attComponents = GatherComponents(gs, (int)att.Value, components.ToArray());
                 Component attComp = SelectComponent(attComponents);
                 (bool isValid, int points) = VerifyComponent(attComp, componentAttributes);
                 if (isValid) {
@@ -108,12 +122,14 @@ public class GameSystemEntity {
         Component[] children = GatherChildComponents(gs, parentComponent.ComponentId);
         if (children.Any()) {
             Component selectedComponent = SelectComponent(children);
-            (bool isValid, int points) = VerifyComponent(selectedComponent);
+            (bool isValid, int points) = VerifyComponent(selectedComponent, new List<GameInstanceComponent> { parentComponent });
             if (isValid) {
                 GameInstanceComponent c = new(selectedComponent, points, 0); // rollupPoints);
                 List<GameInstanceComponent> addComponents = await SelectChildComponents(gs, c);
                 if (selectedComponent.Attributes?.Any() ?? false) {
-                    addComponents.AddRange(await SelectAttributes(gs, selectedComponent.Attributes));
+                    var checkComponents = new List<GameInstanceComponent> { parentComponent };
+                    checkComponents.AddRange(childComponents);
+                    addComponents.AddRange(await SelectAttributes(gs, selectedComponent.Attributes, checkComponents));
                 }
 
                 c.Children = addComponents;
@@ -132,13 +148,36 @@ public class GameSystemEntity {
         return null;
     }
 
-    private (bool IsValid, int PointValue) VerifyComponent(Component component, List<GameInstanceComponent> addtlComponents = null) {
-        var checkList = _gameComponents.ToArray();
+    private GameInstanceComponent[] BuildCheckList(List<GameInstanceComponent> addtlComponents) {
+        var checkList = new List<GameInstanceComponent>();
+        checkList.AddRange(_gameComponents);
         checkList.AddRange(addtlComponents ?? new());
+        return checkList.ToArray();
+    }
 
-        if ((!component?.InstanceLimit.HasValue ?? false) || GetCurrentInstanceCount(component.Id, checkList) < component.InstanceLimit.Value) {
+    private (bool IsValid, int PointValue) VerifyComponent(Component component, List<GameInstanceComponent> addtlComponents = null) {
+        if (component == null) return (false, 0);
+
+        var checkList = BuildCheckList(addtlComponents);
+
+        if ((!component.InstanceLimit.HasValue) || GetCurrentInstanceCount(component.Id, checkList) < component.InstanceLimit.Value) {
+            // Check Any Component Restrictions
+            /*
+            var restrictions = component.Attributes?.Where(c => c.Type == ComponentAttributeType.ComponentRestriction);
+            foreach(ComponentAttribute restriction in restrictions ?? new ComponentAttribute[0]) {
+                if (!restrictions.All(r => CheckComponentRestrictions(r.Id, checkList))) {
+                    return (false, 0);
+                }
+            }
+            */
+
+
+            // if (!component.Attributes?.Where(c => c.Type == ComponentAttributeType.ComponentRestriction).All(att => checkList.Any(c => c.ComponentId == att.Id)) ?? false) {
+            //    return (false, 0);
+            //}
+            
             // Get Component Point Cost
-            int pointCost = (int) (component?.Attributes?.FirstOrDefault(a => a.Type == ComponentAttributeType.PointCost)?.Value ?? 0);
+            int pointCost = (int) (component.Attributes?.FirstOrDefault(a => a.Type == ComponentAttributeType.PointCost)?.Value ?? 0);
 
             // Compare to Running Point Total
             if ((pointCost + _pointTotal) <= _gameSystemOpts.ComponentPointLimit) {
@@ -160,5 +199,13 @@ public class GameSystemEntity {
             instanceCount += GetCurrentInstanceCount(componentId, c.Children.ToArray());
         }
         return instanceCount;
+    }
+
+    private bool CheckComponentRestrictions(long checkId, IEnumerable<GameInstanceComponent> checkList) {
+        foreach(GameInstanceComponent c in checkList) {
+            if (c.ComponentId == checkId) return true;
+            if (CheckComponentRestrictions(checkId, c.Children)) return true;
+        }
+        return false;
     }
 }

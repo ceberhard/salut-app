@@ -99,6 +99,6 @@ public enum ComponentAttributeType {
 
 public class ComponentAttribute {
     public long Id { get; init; }
-    public object Value { get; set; }
+    public long Value { get; set; }
     public ComponentAttributeType Type { get; set; }
 }
