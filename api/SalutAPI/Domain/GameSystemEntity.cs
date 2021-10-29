@@ -15,7 +15,7 @@ public class GameSystemEntity {
         await RunPlayerSetupStepsAsync(gs, () => new GameSystemOptions {
             PlayerCount = 2,
             ComponentPointLimit = 200,
-            AttributeApplyPercent = 40,
+            AttributeApplyPercent = 50,
             RetryTolerance = 10
         });
 
@@ -30,17 +30,20 @@ public class GameSystemEntity {
 
     private Component[] GatherChildComponents(GameSystem gs, long parentComponentId) => gs.Components.Where(c => c.ParentComponentId.HasValue && c.ParentComponentId.Value == parentComponentId).ToArray();
 
-    private Component[] GatherComponents(GameSystem gs, long componentTypeId,params GameInstanceComponent[] checkComponents) {
+    private Component[] GatherComponents(GameSystem gs, long componentTypeId, Component currentComponent, params GameInstanceComponent[] checkComponents) {
         List<Component> gathered = new();
         var comps = gs.Components.Where(c => c.ComponentTypeId == componentTypeId);
         foreach(Component comp in comps) {
+            var addComp = false;
             var atts = comp.Attributes?.Where(att => att.Type == ComponentAttributeType.ComponentRestriction).ToArray() ?? new ComponentAttribute[0];
-            if (!atts.Any()) {
-                gathered.Add(comp);
-            } else {
-                if (atts.All(att => CheckComponentRestrictions((long)att.Value, checkComponents))) gathered.Add(comp);
+            addComp = (!atts.Any() || atts.All(att => CheckComponentRestrictions((long)att.Value, checkComponents)));
+            
+            if (addComp) {
+                var attRestricts = comp.Attributes?.Where(x => x.Type == ComponentAttributeType.AttributeRestriction).ToArray() ?? new ComponentAttribute[0];
+                addComp = (!attRestricts.Any() || (currentComponent != null && CheckAttributeRestrictions(attRestricts, currentComponent.Attributes)));
             }
-
+            
+            if (addComp) gathered.Add(comp);
         }
         return gathered.ToArray();
     }
@@ -75,7 +78,7 @@ public class GameSystemEntity {
                     if (!playerComponents.Any() || playerComponents.Count() < playerStep.SelectionCount) {
                         // Pull Component for the step Component Type
                         
-                        Component[] components = GatherComponents(gameSystem, playerStep.ComponentTypeId, playerComponents.ToArray());
+                        Component[] components = GatherComponents(gameSystem, playerStep.ComponentTypeId, null, playerComponents.ToArray());
                         if (components?.Any() ?? false) {
                             Component component = SelectComponent(components);
                             // Attach Selected Component to the game instance
@@ -102,11 +105,11 @@ public class GameSystemEntity {
         }
     }
 
-    private async Task<List<GameInstanceComponent>> SelectAttributes(GameSystem gs, IEnumerable<ComponentAttribute> attributes, List<GameInstanceComponent> components) {
+    private async Task<List<GameInstanceComponent>> SelectAttributes(GameSystem gs, Component currentComponent, List<GameInstanceComponent> components) {
         List<GameInstanceComponent> componentAttributes = new();
-        await foreach(var att in FetchComponentTypeAttributes(attributes)) {
+        await foreach(var att in FetchComponentTypeAttributes(currentComponent.Attributes)) {
             if (Util.RandomUtil.CheckPercent(_gameSystemOpts.AttributeApplyPercent)) {
-                Component[] attComponents = GatherComponents(gs, (int)att.Value, components.ToArray());
+                Component[] attComponents = GatherComponents(gs, (int)att.Value, currentComponent, components.ToArray());
                 Component attComp = SelectComponent(attComponents);
                 (bool isValid, int points) = VerifyComponent(attComp, componentAttributes);
                 if (isValid) {
@@ -129,7 +132,7 @@ public class GameSystemEntity {
                 if (selectedComponent.Attributes?.Any() ?? false) {
                     var checkComponents = new List<GameInstanceComponent> { parentComponent };
                     checkComponents.AddRange(childComponents);
-                    addComponents.AddRange(await SelectAttributes(gs, selectedComponent.Attributes, checkComponents));
+                    addComponents.AddRange(await SelectAttributes(gs, selectedComponent, checkComponents));
                 }
 
                 c.Children = addComponents;
@@ -142,6 +145,8 @@ public class GameSystemEntity {
 
     private Component SelectComponent(IEnumerable<Component> components) {
         if (components?.Any() ?? false) {
+            if (components.Count() == 1) return components.First();
+
             int selectionIndex = RandomUtil.Get(0, components.Count());
             return components.Skip(selectionIndex).First();
         }
@@ -207,5 +212,9 @@ public class GameSystemEntity {
             if (CheckComponentRestrictions(checkId, c.Children)) return true;
         }
         return false;
+    }
+
+    private bool CheckAttributeRestrictions(ComponentAttribute[] checkAtts, IEnumerable<ComponentAttribute> attList) {
+        return checkAtts.All(ca => attList.Any(x => x.Type == ComponentAttributeType.Descriptive && x.Value == ca.Value));
     }
 }

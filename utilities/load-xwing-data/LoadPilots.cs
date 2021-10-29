@@ -30,6 +30,11 @@ namespace LoadXWing {
         private const int COL_PILOT_UPGRADE_TITLE = 23;
         private const int COL_PILOT_UPGRADE_TORPEDO = 24;
         private const int COL_PILOT_UPGRADE_TURRET = 25;
+        private const int COL_PILOT_ATTRIBUTE1 = 27;
+        private const int COL_PILOT_ATTRIBUTE2 = 28;
+        private const int COL_PILOT_ATTRIBUTE3 = 29;
+        private const int COL_PILOT_ATTRIBUTE4 = 30;
+        private const int COL_PILOT_ATTRIBUTE5 = 31;
 
         public async static Task LoadAsync(string pilotFilePath, int parentComponentId, int componentSeqStart, int attributeSeqStart, string fileName) {
             using (XLWorkbook wb = new(pilotFilePath)) {
@@ -78,6 +83,12 @@ namespace LoadXWing {
                     components.Append(BuildUpgradeAttributes(r, COL_PILOT_UPGRADE_TORPEDO, Constants.COMPONENT_UPGRADE_TYPE_TORPEDO, ref attributeId));
                     components.Append(BuildUpgradeAttributes(r, COL_PILOT_UPGRADE_TURRET, Constants.COMPONENT_UPGRADE_TYPE_TURRET, ref attributeId));
 
+                    components.Append(BuildAttributeFeatures(r, COL_PILOT_ATTRIBUTE1, ref attributeId));
+                    components.Append(BuildAttributeFeatures(r, COL_PILOT_ATTRIBUTE2, ref attributeId));
+                    components.Append(BuildAttributeFeatures(r, COL_PILOT_ATTRIBUTE3, ref attributeId));
+                    components.Append(BuildAttributeFeatures(r, COL_PILOT_ATTRIBUTE4, ref attributeId));
+                    components.Append(BuildAttributeFeatures(r, COL_PILOT_ATTRIBUTE5, ref attributeId));
+
                     components.Append(" } },");
 
                     components.AppendLine();
@@ -98,6 +109,16 @@ namespace LoadXWing {
             for (var i = 0; i < upgradeCount; i++) {
                 attributeId++;
                 atts.Append($", new () {{ Id = {attributeId}, Value = {upgradeTypeId}, Type = ComponentAttributeType.AppendComponentType }}");
+            }
+            return atts.ToString();
+        }
+
+        private static string BuildAttributeFeatures(IXLRangeRow row, int colIndex, ref int attributeId) {
+            StringBuilder atts = new StringBuilder();
+            string feature = row.Cell(colIndex).Value?.ToString();
+            if (!string.IsNullOrEmpty(feature)) {
+                attributeId++;
+                atts.Append($", new () {{ Id = {attributeId}, Value = {Conversions.GetAttributeFeatureId(feature.Trim())}, Type = ComponentAttributeType.Descriptive }}");
             }
             return atts.ToString();
         }

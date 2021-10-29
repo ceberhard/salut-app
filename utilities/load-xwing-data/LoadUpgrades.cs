@@ -10,6 +10,7 @@ namespace LoadXWing {
         private const int COL_UPGRADE_COST = 3;
         private const int COL_UPGRADE_INSTANCE_LIMIT = 4;
         private const int COL_UPGRADE_FACTION_RESTRICTION = 5;
+        private const int COL_ATTRIBUTE_RESTRICTION1 = 6;
 
         public async static Task LoadAsync(string upgradeFilePath) {
             using (XLWorkbook wb = new(upgradeFilePath)) {
@@ -27,7 +28,8 @@ namespace LoadXWing {
                     var cost = r.Cell(COL_UPGRADE_COST).GetString();
                     var instanceLimit = r.Cell(COL_UPGRADE_INSTANCE_LIMIT).GetString();
                     var factionRestriction = r.Cell(COL_UPGRADE_FACTION_RESTRICTION).GetString();
-                    var typeId = GetComponentTypeId(type);
+                    var attributeRestriction1 = r.Cell(COL_ATTRIBUTE_RESTRICTION1).GetString();
+                    var typeId = Conversions.GetComponentTypeId(type);
 
                     components.Append($"new Component {{ Id = {componentId}, ");
                     components.Append($"Name = \"{name.Replace("\"", "\\\"")}\", ");
@@ -38,7 +40,12 @@ namespace LoadXWing {
 
                     if (!string.IsNullOrWhiteSpace(factionRestriction)) {
                         attCostId++;
-                        components.Append($", new() {{ Id = {attCostId}, Value = {GetFactionId(factionRestriction)}, Type = ComponentAttributeType.ComponentRestriction }}");
+                        components.Append($", new() {{ Id = {attCostId}, Value = {Conversions.GetFactionId(factionRestriction)}, Type = ComponentAttributeType.ComponentRestriction }}");
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(attributeRestriction1)) {
+                        attCostId++;
+                        components.Append($", new() {{ Id = {attCostId}, Value = {Conversions.GetAttributeFeatureId(attributeRestriction1)}, Type = ComponentAttributeType.AttributeRestriction }}");
                     }
 
                     components.Append(" } },");
@@ -53,32 +60,5 @@ namespace LoadXWing {
                 Console.WriteLine("Created upgrades.txt...");
             }
         }
-
-        private static int GetComponentTypeId(string typeText) => typeText switch {
-            "Astromech" => Constants.COMPONENT_UPGRADE_TYPE_ASTROMECH,
-            "Cannon" => Constants.COMPONENT_UPGRADE_TYPE_CANNON,
-            "Configuration" => Constants.COMPONENT_UPGRADE_TYPE_CONFIGURATION,
-            "Crew" => Constants.COMPONENT_UPGRADE_TYPE_CREW,
-            "Force Power" => Constants.COMPONENT_UPGRADE_TYPE_FORCE,
-            "Gunner" => Constants.COMPONENT_UPGRADE_TYPE_GUNNER,
-            "Illicit" => Constants.COMPONENT_UPGRADE_TYPE_ILLICIT,
-            "Missile" => Constants.COMPONENT_UPGRADE_TYPE_MISSILE,
-            "Modification" => Constants.COMPONENT_UPGRADE_TYPE_MODIFICATION,
-            "Payload" => Constants.COMPONENT_UPGRADE_TYPE_PAYLOAD,
-            "Sensor" => Constants.COMPONENT_UPGRADE_TYPE_SENSOR,
-            "Talent" => Constants.COMPONENT_UPGRADE_TYPE_TALENT,
-            "Tech" => Constants.COMPONENT_UPGRADE_TYPE_TECH,
-            "Torpedo" => Constants.COMPONENT_UPGRADE_TYPE_TORPEDO,
-            "Turret" => Constants.COMPONENT_UPGRADE_TYPE_TURRET,
-            "Title" => Constants.COMPONENT_UPGRADE_TYPE_TITLE,
-            _ => throw new ArgumentException($"Not supported Upgrade Type: {typeText}"),
-        };
-
-        private static int GetFactionId(string faction) => faction switch {
-            "Rebels" => Constants.COMPONENT_FACTION_REBELS,
-            "Imperials" => Constants.COMPONENT_FACTION_IMPERIALS,
-            "Scum & Villainy" => Constants.COMPONENT_FACTION_SCUM,
-            _ => throw new ArgumentException($"Not supported Faction: {faction}"),
-        };
     }
 }

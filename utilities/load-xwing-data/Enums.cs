@@ -1,0 +1,41 @@
+namespace LoadXWing;
+
+public static class Enums {
+    public enum DescriptiveAttribute {
+        Aggressor = 1,
+        AttackShuttle = 2,
+        Awing = 3,
+        BountyHunter = 4,
+        Bwing = 5,
+        Clone = 6,
+        DarkSide = 7,
+        Droid = 8,
+        Firespray = 9,
+        Freighter = 10,
+        G1A = 11,
+        HWK290 = 12,
+        Jedi = 13,
+        JumpMaster5000 = 14,
+        Lancer = 15,
+        LightSide = 16,
+        Mandalorian = 17,
+        Partisan = 18,
+        Scurrg = 19,
+        Sith = 20,
+        Spectre = 21,
+        StarViper = 22,
+        StarWing = 23,
+        T4aShuttle = 24,
+        TIE = 25,
+        TIE_D = 26,
+        TIE_rb = 27,
+        Uwing = 28,
+        VCX100 = 29,
+        VT49 = 30,
+        Xwing = 31,
+        YT1300 = 32,
+        YT2400 = 33,
+        YV666 = 34,
+        Ywing = 35
+    }
+}

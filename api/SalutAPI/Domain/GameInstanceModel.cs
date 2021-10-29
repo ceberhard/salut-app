@@ -54,6 +54,8 @@ public class GameInstanceComponent : Component
         this.ComponentTypeId = src.ComponentTypeId;
         this.ParentComponentId = src.ParentComponentId;
         this.Name = src.Name;
+        this.Description = src.Description;
+        this.Attributes = src.Attributes;
     }
 }
 
