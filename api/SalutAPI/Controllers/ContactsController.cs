@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using SalutAPI.Domain;
 
@@ -13,6 +14,7 @@ public class ContactsController : ControllerBase {
     }
 
     [HttpGet]
+    [EnableCors("SalutPolicy")]
     public IActionResult Get() {
         return Ok(new List<ContactEntity> {
             new ContactEntity {
@@ -24,6 +26,16 @@ public class ContactsController : ControllerBase {
                 Id = 2,
                 FirstName = "Han",
                 LastName = "Solo"
+            },
+            new ContactEntity {
+                Id = 3,
+                FirstName = "Anakin",
+                LastName = "Skywalker"
+            },
+            new ContactEntity {
+                Id = 4,
+                FirstName = "Leia",
+                LastName = "Organa"
             }
         });
     }

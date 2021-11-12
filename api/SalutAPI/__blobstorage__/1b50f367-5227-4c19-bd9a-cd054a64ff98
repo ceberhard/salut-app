@@ -1,0 +1,19 @@
+CREATE TABLE [dbo].[ChrisTestTable] (
+    [Id]                       INT            IDENTITY (1, 1) NOT NULL,
+    [OfferId]                  NVARCHAR (50)  NULL,
+    [ImageOnly]                BIT            NULL,
+    [ShowFeatureBanner]        BIT            NULL,
+    [ProgramId]                NVARCHAR (50)  NULL,
+    [OrganizationId]           BIGINT         NOT NULL,
+    [Category]                 NVARCHAR (50)  NOT NULL,
+    [SubCategory]              NVARCHAR (50)  NULL,
+    [Image]                    NVARCHAR (100) NULL,
+    [BannerOfferTitle]         NVARCHAR (250) NULL,
+    [CreatedOn]                DATETIME2 (7)  NOT NULL,
+    [LastUpdatedOn]            DATETIME2 (7)  NOT NULL,
+    [CreatedBy]                BIGINT         NOT NULL,
+    [LastUpdatedBy]            BIGINT         NOT NULL,
+    [CreatedByDisplayName]     NVARCHAR (50)  NOT NULL,
+    [LastUpdatedByDisplayName] NVARCHAR (50)  NOT NULL,
+    CONSTRAINT [PK_ChrisTestTable] PRIMARY KEY CLUSTERED ([Id] ASC)
+);

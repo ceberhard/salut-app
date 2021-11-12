@@ -13,6 +13,8 @@ export default function ContactsList() {
     // const contacts = useSelector((state) => state.contacts);
     const contactIds = useSelector(selectContactIds);
 
+    console.log('ContactsList data', contactIds);
+
     const dispatch = useDispatch();
 
     const ContactItems = contactIds.map((contactId) =>

@@ -4,9 +4,11 @@ import './index.css';
 import App from './App';
 import store from './store/store';
 import { Provider } from 'react-redux';
-import { fetchContacts } from './store/contacts/contacts.slice'
+import { fetchContacts } from './store/contacts/contacts.slice';
+import { fetchGameSystem } from './store/gamesystem/gamesystem.slice';
 
-store.dispatch(fetchContacts())
+store.dispatch(fetchContacts());
+store.dispatch(fetchGameSystem());
 
 ReactDOM.render(
   <React.StrictMode>

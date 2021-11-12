@@ -1,0 +1,74 @@
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+/******************************************************
+* run in Offers database
+* dev		09/07/21	pr 6706
+*******************************************************/
+CREATE PROCEDURE [ParkingLot].[usp_InsertTransactionLog]
+	@ProgramId VARCHAR(255),
+	@OrganizationId BIGINT
+AS
+/**********************************************************************************************************************
+* 09/07/2021	Chris Eberhard		Inserts a new parking lot program for an organization if it does not already exist
+***********************************************************************************************************************/
+BEGIN TRY
+	SET NOCOUNT ON;
+
+	IF @ProgramId IS NULL OR @ProgramId = '' THROW 51000, 'ProgramId is null or Empty', 16
+
+	IF @OrganizationId IS NULL OR @OrganizationId <= 0 THROW 51000, 'OrganizationId is null or less than or equal to 0', 16
+
+    -- If for some reason this proc is called and the record for Org and Program already exists, then don't tdo anything.
+	IF NOT EXISTS(SELECT * FROM [Parkinglot].[TransactionLog] tl WHERE tl.ProgramId = @ProgramId AND tl.OrganizationId = @OrganizationId)
+		INSERT INTO [ParkingLot].[TransactionLog]
+           ([OrganizationId]
+           ,[ProgramId])
+        VALUES
+           (@OrganizationId
+           ,@ProgramId);
+END TRY
+BEGIN CATCH
+   THROW;
+END CATCH
+GO
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+/******************************************************
+* run in Offers database
+* dev		09/07/21	pr 6706
+*******************************************************/
+CREATE PROCEDURE [ParkingLot].[usp_InsertTransactionLog]
+	@ProgramId VARCHAR(255),
+	@OrganizationId BIGINT
+AS
+/**********************************************************************************************************************
+* 09/07/2021	Chris Eberhard		Inserts a new parking lot program for an organization if it does not already exist
+***********************************************************************************************************************/
+BEGIN TRY
+	SET NOCOUNT ON;
+
+	IF @ProgramId IS NULL OR @ProgramId = '' THROW 51000, 'ProgramId is null or Empty', 16
+
+	IF @OrganizationId IS NULL OR @OrganizationId <= 0 THROW 51000, 'OrganizationId is null or less than or equal to 0', 16
+
+    -- If for some reason this proc is called and the record for Org and Program already exists, then don't tdo anything.
+	IF NOT EXISTS(SELECT * FROM [Parkinglot].[TransactionLog] tl WHERE tl.ProgramId = @ProgramId AND tl.OrganizationId = @OrganizationId)
+		INSERT INTO [ParkingLot].[TransactionLog]
+           ([OrganizationId]
+           ,[ProgramId])
+        VALUES
+           (@OrganizationId
+           ,@ProgramId);
+END TRY
+BEGIN CATCH
+   THROW;
+END CATCH
+GO

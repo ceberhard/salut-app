@@ -1,0 +1,45 @@
+CREATE   PROCEDURE [dbo].[usp_ChrisTestProc]
+(
+	@Id int
+)
+AS
+/************************************************************
+* 05/12/2021	Allan Saywitz	Selects ad placement by id
+*************************************************************/
+BEGIN TRY
+	SET NOCOUNT ON;
+    
+	IF @Id IS NULL
+		THROW  51000,  'Id was NULL', 16
+	IF @Id < 1
+		THROW  51000,  'Id was < 1', 16
+
+    SELECT 
+		[Id]
+		,[OrganizationId]
+		,[BHCountryId]
+		,[PlacementType]
+		,[Category]
+		,[SubCategory]
+		,[ProgramId]
+		,[OfferId]
+		,[Route]
+		,[StartDate]
+		,[EndDate]
+		,[Priority]
+		,[Title]
+		,[Data]
+		,[RowStatus]
+		,[CreatedOn]
+		,[CreatedByUserId]
+		,[LastModified]
+		,[LastModifiedByUserId]
+    FROM 
+        bh.Placement
+	WHERE
+		Id = @Id
+	
+END TRY
+BEGIN CATCH
+   THROW;
+END CATCH
