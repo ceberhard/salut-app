@@ -23,6 +23,7 @@ public class GameInstanceComponent : Component
     public GameInstanceComponent(Component component, long componentAttributeId, int pointValue, int rollupPointValue)
     {   
         SetComponentValues(component);
+        this.Id = component.Id;
         this.ComponentAttributeId = componentAttributeId;
         this.PointValue = pointValue;
         this.RollupPointValue = rollupPointValue;
@@ -31,6 +32,7 @@ public class GameInstanceComponent : Component
     public GameInstanceComponent(Component component, int pointValue, int rollupPointValue)
     {
         SetComponentValues(component);
+        this.Id = component.Id;
         this.PointValue = pointValue;
         this.RollupPointValue = rollupPointValue;
     }
