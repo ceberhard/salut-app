@@ -34,6 +34,14 @@ public class GameSystemEntity {
         }
     }
 
+    public async Task<GameSystem> UpdateGameSystem(GameSystem gameSystem) {
+        using (GameSystemRepo gameSystemRepo = new()) {
+            _ = gameSystemRepo.GameSystem.Update(gameSystem);
+            _ = await gameSystemRepo.SaveChangesAsync();
+            return gameSystem;
+        }
+    }
+
     private async IAsyncEnumerable<ComponentAttribute> FetchComponentTypeAttributes(IEnumerable<ComponentAttribute> atts) { foreach(var att in atts.Where(x => x.Type == ComponentAttributeType.AppendComponentType)) yield return att; }
 
     private Component[] GatherChildComponents(GameSystem gs, long parentComponentId) => gs.Components.Where(c => c.ParentComponentId.HasValue && c.ParentComponentId.Value == parentComponentId).ToArray();
@@ -175,21 +183,6 @@ public class GameSystemEntity {
         var checkList = BuildCheckList(addtlComponents);
 
         if ((!component.InstanceLimit.HasValue) || GetCurrentInstanceCount(component.Id, checkList) < component.InstanceLimit.Value) {
-            // Check Any Component Restrictions
-            /*
-            var restrictions = component.Attributes?.Where(c => c.Type == ComponentAttributeType.ComponentRestriction);
-            foreach(ComponentAttribute restriction in restrictions ?? new ComponentAttribute[0]) {
-                if (!restrictions.All(r => CheckComponentRestrictions(r.Id, checkList))) {
-                    return (false, 0);
-                }
-            }
-            */
-
-
-            // if (!component.Attributes?.Where(c => c.Type == ComponentAttributeType.ComponentRestriction).All(att => checkList.Any(c => c.ComponentId == att.Id)) ?? false) {
-            //    return (false, 0);
-            //}
-            
             // Get Component Point Cost
             int pointCost = (int) (component.Attributes?.FirstOrDefault(a => a.Type == ComponentAttributeType.PointCost)?.Value ?? 0);
 

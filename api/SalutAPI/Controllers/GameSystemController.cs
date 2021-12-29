@@ -20,6 +20,11 @@ public class GameSystemController : ControllerBase {
         return Accepted(await new GameSystemEntity().CreateGameSystem(gameSystem));
     }
 
+    [HttpPut]
+    public async Task<IActionResult> Update([FromBody] GameSystem gameSystem) {
+        return Accepted(await new GameSystemEntity().UpdateGameSystem(gameSystem));
+    }
+
     [HttpPost("build/{gameSystemid}")]
     public async Task<IActionResult> Build([FromRoute]long gameSystemId) {
         return Ok(await new GameSystemEntity().BuildGameInstanceAsync(1001));
