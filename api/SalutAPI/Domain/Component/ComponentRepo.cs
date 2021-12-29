@@ -1,7 +1,9 @@
+using Microsoft.EntityFrameworkCore;
 
 namespace SalutAPI.Domain;
 
-public class ComponentRepo {
+public class ComponentRepo : DbContext {
 
+    
 
 }

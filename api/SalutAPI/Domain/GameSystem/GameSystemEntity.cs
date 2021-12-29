@@ -26,6 +26,10 @@ public class GameSystemEntity {
         };
     }
 
+    public async Task<int> CreateGameSystem(GameSystem gameSystem) {
+        
+    }
+
     private async IAsyncEnumerable<ComponentAttribute> FetchComponentTypeAttributes(IEnumerable<ComponentAttribute> atts) { foreach(var att in atts.Where(x => x.Type == ComponentAttributeType.AppendComponentType)) yield return att; }
 
     private Component[] GatherChildComponents(GameSystem gs, long parentComponentId) => gs.Components.Where(c => c.ParentComponentId.HasValue && c.ParentComponentId.Value == parentComponentId).ToArray();

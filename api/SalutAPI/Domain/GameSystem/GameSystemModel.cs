@@ -1,3 +1,5 @@
+using SalutAPI.Domain.Model;
+
 namespace SalutAPI.Domain;
 
 public class GameSystem {
@@ -60,11 +62,6 @@ public class PlayerSetupStep {
     public string Name { get; set; }
 
     public ComponentType ComponentType { get; set; }
-}
-
-public class ComponentType {
-    public long Id { get; init; }
-    public string Name { get; set; }
 }
 
 public class Component {
