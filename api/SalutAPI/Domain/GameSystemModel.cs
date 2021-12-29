@@ -5,7 +5,6 @@ public class GameSystem {
 
     public long Id { get; init; }
     public string Name { get; set; }
-
     public GameSystemConfig SystemConfig { get; set; }
     public PlayerConfig PlayerConfig { get; set; }
 

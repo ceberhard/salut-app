@@ -1,0 +1,8 @@
+USE SalutApp;
+CREATE TABLE IF NOT EXISTS PlayerConfig
+(
+    Id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    GameSystemId BIGINT NOT NULL,
+	PointsAllowed INT NOT NULL,
+	FOREIGN KEY (GameSystemId) REFERENCES GameSystem(Id)
+);
