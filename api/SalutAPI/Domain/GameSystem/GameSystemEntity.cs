@@ -26,8 +26,12 @@ public class GameSystemEntity {
         };
     }
 
-    public async Task<int> CreateGameSystem(GameSystem gameSystem) {
-        
+    public async Task<GameSystem> CreateGameSystem(GameSystem gameSystem) {
+        using (GameSystemRepo gameSystemRepo = new()) {
+            _ = await gameSystemRepo.GameSystem.AddAsync(gameSystem);
+            _ = await gameSystemRepo.SaveChangesAsync();
+            return gameSystem;
+        }
     }
 
     private async IAsyncEnumerable<ComponentAttribute> FetchComponentTypeAttributes(IEnumerable<ComponentAttribute> atts) { foreach(var att in atts.Where(x => x.Type == ComponentAttributeType.AppendComponentType)) yield return att; }
@@ -74,7 +78,7 @@ public class GameSystemEntity {
         for(int playerItem = 0; playerItem < _gameSystemOpts.PlayerCount; playerItem++) {
             _pointTotal = 0;
             int retryCount = 0;
-
+            /*
             foreach (PlayerSetupStep playerStep in gameSystem.PlayerConfig.Steps.OrderBy(st => st.StepOrder)) {
                 List<GameInstanceComponent> playerComponents = new();
 
@@ -106,6 +110,7 @@ public class GameSystemEntity {
 
                 _gameComponents.AddRange(playerComponents);
             }
+            */
         }
     }
 

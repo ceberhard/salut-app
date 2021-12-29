@@ -15,6 +15,11 @@ public class GameSystemController : ControllerBase {
         return Ok(await new GameSystemRepo().FindByIdAsync(1001));
     }
 
+    [HttpPost]
+    public async Task<IActionResult> Create([FromBody] GameSystem gameSystem) {
+        return Accepted(await new GameSystemEntity().CreateGameSystem(gameSystem));
+    }
+
     [HttpPost("build/{gameSystemid}")]
     public async Task<IActionResult> Build([FromRoute]long gameSystemId) {
         return Ok(await new GameSystemEntity().BuildGameInstanceAsync(1001));

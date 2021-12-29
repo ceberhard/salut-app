@@ -1,10 +1,17 @@
+using Microsoft.EntityFrameworkCore;
 
 namespace SalutAPI.Domain;
 
-public class GameSystemRepo {
+public class GameSystemRepo : DbContext {
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {
+        optionsBuilder.UseMySQL("Server=localhost; Port=3307; Database=SalutApp; Uid=admin; Pwd=admin1234;");
+    }
+
+    public DbSet<GameSystem> GameSystem { get; set; }
 
     public async Task<GameSystem> FindByIdAsync(long id) {
         return new GameSystem(1001, "X-Wind 2nd Edition") {
+            /*
             SystemConfig = new GameSystemConfig {
                 Id = 8801,
                 PlayerMinCount = 2,
@@ -23,6 +30,7 @@ public class GameSystemRepo {
                     }
                 }
             },
+            */
             Components = new List<Component>() {
 new Component { Id = 2001, Name = "Rebels", InstanceLimit = 1, ComponentTypeId = 2601, ComponentType = new() { Id = 2601, Name = "Faction" } },
 new Component { Id = 2002, Name = "Imperials", InstanceLimit = 1, ComponentTypeId = 2601, ComponentType = new() { Id = 2601, Name = "Faction" } },
