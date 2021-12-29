@@ -6,14 +6,17 @@ import {
 import styles from './GameSystem.css';
 
 const SubComponents = ({ component }) => {
-    if (!component || !component.children) {
+    if (!component) {
         return <h2>Loading...</h2>;
     }
 
     return component && component.children && component.children.map((child) =>
-        <li key={child.id}>{child.name} ({child.rollupPointValue || child.pointValue} points)</li>
+        <li key={child.id}>{child.name} ({child.rollupPointValue || child.pointValue} points)
+            <ul>
+                <SubComponents component={child} />
+            </ul>
+        </li>
     );
-    
 }
 
 export default function GameSystem() {
