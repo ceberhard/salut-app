@@ -1,4 +1,5 @@
 using System;
+using Microsoft.EntityFrameworkCore;
 using SalutAPI.Util;
 
 namespace SalutAPI.Domain;
@@ -26,18 +27,30 @@ public class GameSystemEntity {
         };
     }
 
-    public async Task<GameSystem> CreateGameSystem(GameSystem gameSystem) {
-        using (GameSystemRepo gameSystemRepo = new()) {
-            _ = await gameSystemRepo.GameSystem.AddAsync(gameSystem);
-            _ = await gameSystemRepo.SaveChangesAsync();
+    public async Task<GameSystem> CreateGameSystemAsync(GameSystem gameSystem) {
+        using (SalutAppRepo repo = new()) {
+            _ = await repo.GameSystem.AddAsync(gameSystem);
+            _ = await repo.SaveChangesAsync();
             return gameSystem;
         }
     }
 
-    public async Task<GameSystem> UpdateGameSystem(GameSystem gameSystem) {
-        using (GameSystemRepo gameSystemRepo = new()) {
-            _ = gameSystemRepo.GameSystem.Update(gameSystem);
-            _ = await gameSystemRepo.SaveChangesAsync();
+    public async Task<GameSystem> GetGameSystemAsync(long gameSystemId) {
+        using (SalutAppRepo repo = new()) 
+            return await repo.GameSystem
+                .Include(gs => gs.PlayerConfig.Steps)
+                .Where(gs => gs.Id == gameSystemId)
+                .FirstOrDefaultAsync();
+    }
+
+    public async Task<GameSystem> UpdateGameSystemAsync(GameSystem gameSystem) {
+        using (SalutAppRepo repo = new()) {
+            if (gameSystem.Id > 0) {
+                _ = repo.GameSystem.Update(gameSystem);
+            } else {
+                _ = await repo.GameSystem.AddAsync(gameSystem);
+            }
+            _ = await repo.SaveChangesAsync();
             return gameSystem;
         }
     }

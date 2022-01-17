@@ -2,13 +2,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace SalutAPI.Domain;
 
-public class GameSystemRepo : DbContext {
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {
-        optionsBuilder.UseMySQL("Server=localhost; Port=3307; Database=SalutApp; Uid=admin; Pwd=admin1234;");
-    }
-
-    public DbSet<GameSystem> GameSystem { get; set; }
-
+public class GameSystemRepo {
     public async Task<GameSystem> FindByIdAsync(long id) {
         return new GameSystem(1001, "X-Wind 2nd Edition") {
             /*

@@ -7,5 +7,4 @@ CREATE TABLE IF NOT EXISTS ComponentAttribute
 	Value BIGINT NOT NULL,
 	FOREIGN KEY (ComponentAttributeTypeId) REFERENCES ComponentAttributeType(Id),
 	FOREIGN KEY (ComponentId) REFERENCES Component(Id)
-	
 );

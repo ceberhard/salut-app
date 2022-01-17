@@ -1,14 +1,22 @@
 using SalutAPI.Domain.Model;
+using System.ComponentModel.DataAnnotations;
+using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Serialization;
 
 namespace SalutAPI.Domain;
 
 public class GameSystem {
     public GameSystem(long id, string name) { this.Id = id; this.Name = name; }
 
+    [Key]
     public long Id { get; init; }
+
+    [StringLength(256)]
+    [Required]
     public string Name { get; set; }
     //public GameSystemConfig SystemConfig { get; set; } = null;
-    //public PlayerConfig PlayerConfig { get; set; } =  null;
+
+    public PlayerConfig PlayerConfig { get; set; }
 
     public IEnumerable<Component> Components { get; set; } = new List<Component>();
 }
@@ -37,13 +45,18 @@ public class GameSystemConfigStep {
 
     public int SelectionCount { get; set; }
 
-    public ComponentType ComponentType { get; set; }
+    [JsonIgnore]
+    public ComponentType? ComponentType { get; set; } = null;
 }
 
 public class PlayerConfig {
+    [Key]
     public long Id { get; set; }
+
+    [Required]
     public long GameSystemId { get; set; }
 
+    [Required]
     public int PointsAllowed { get; set; }
 
     public IEnumerable<PlayerSetupStep> Steps { get; set; } = new List<PlayerSetupStep>();
@@ -55,13 +68,14 @@ public class PlayerSetupStep {
 
     public long ComponentTypeId { get; set; }
 
+    public string Name { get; set; }
+
     public int StepOrder { get; set; }
 
     public int SelectionCount { get; set; }
 
-    public string Name { get; set; }
-
-    public ComponentType ComponentType { get; set; }
+    [JsonIgnore]
+    public ComponentType? ComponentType { get; set; } = null;
 }
 
 public class Component {
